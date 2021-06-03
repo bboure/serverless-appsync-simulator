@@ -45,12 +45,20 @@ class ServerlessAppSyncSimulator {
     }
   }
 
+  filterDisabledFunctions(functions) {
+    return Object.keys(functions)
+      .filter((key) =>
+        functions[key].hasOwnProperty('enabled') ? functions[key].enabled : true
+      )
+      .reduce((funcs, key) => ({ ...funcs, [key]: functions[key] }), {});
+  }
+
   async startServers() {
     try {
       this.buildResolvedOptions();
       this.buildResourceResolvers();
       this.serverless.service.functions = this.resolveResources(
-        this.serverless.service.functions,
+        this.filterDisabledFunctions(this.serverless.service.functions),
       );
       this.serverless.service.provider.environment = this.resolveResources(
         this.serverless.service.provider.environment,
